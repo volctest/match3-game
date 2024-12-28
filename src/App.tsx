@@ -44,8 +44,18 @@ function App() {
     setCards(initialCards);
   }, []);
 
+  const isTopCard = (card: Card): boolean => {
+    const cardsAbove = cards.filter(c => 
+      c.x === card.x && 
+      c.y === card.y && 
+      c.z > card.z &&
+      c.visible
+    );
+    return cardsAbove.length === 0;
+  };
+
   const handleCardClick = (clickedCard: Card) => {
-    if (!clickedCard.visible || gameStatus !== 'playing') return;
+    if (!clickedCard.visible || !isTopCard(clickedCard) || gameStatus !== 'playing') return;
 
     const newCards = cards.map(card => 
       card.id === clickedCard.id ? { ...card, selected: true } : card
