@@ -140,7 +140,7 @@ function App() {
           </button>
         </div>
 
-        <div className="relative w-full h-[60vh] py-8">
+        <div className="relative w-full h-[800px] py-8">
           {cards
             .filter(card => card.visible)
             .map(card => {
@@ -180,10 +180,10 @@ function App() {
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${(card.x * 35) + (card.z * 35)}px`,
-                    top: `${(card.y * 35) + (card.z * 35)}px`,
+                    left: `${(card.x * 150) - ((3 - card.z) * 75)}px`,
+                    top: `${(card.y * 150) - ((3 - card.z) * 75)}px`,
                     transform: `${card.visible ? 'scale(1)' : 'scale(0)'}`,
-                    opacity: card.visible ? (1 - (card.z * 0.1)) : 0,
+                    opacity: card.visible ? 1 : 0,
                     transition: 'all 0.3s ease',
                     zIndex: card.z
                   }}
