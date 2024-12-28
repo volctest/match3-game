@@ -180,19 +180,19 @@ function App() {
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${(card.x * 32) + (card.z * 16)}px`,
-                    top: `${(card.y * 32)}px`,
-                    transform: `translate(${card.z * -16}px, ${card.z * 16}px) ${card.visible ? 'scale(1)' : 'scale(0)'}`,
+                    left: `${(card.x * 24) + (card.z * 12)}px`,
+                    top: `${(card.y * 24)}px`,
+                    transform: `translate(${card.z * -12}px, ${card.z * 12}px) ${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? (1 - (card.z * 0.1)) : 0,
                     transition: 'all 0.3s ease',
                     zIndex: card.z
                   }}
                   className={`
-                    p-4 rounded-xl
+                    p-3 rounded-xl
                     border-4 border-[#556B2F]
                     shadow-lg
                     transition-all
-                    w-16 h-16
+                    w-14 h-14
                     flex items-center justify-center
                     ${isPending 
                       ? 'bg-[#FFFDD0]/60 scale-90 border-yellow-500' 
@@ -203,7 +203,7 @@ function App() {
                   `}
                   disabled={gameStatus !== 'playing' || (!isPending && pendingCard !== null)}
                 >
-                  <Icon className="w-12 h-12" />
+                  <Icon className="w-10 h-10" />
                 </button>
               );
             })}
@@ -214,7 +214,7 @@ function App() {
               <button
                 key={`slot-${index}`}
                 className={`
-                  w-16 h-16
+                  w-14 h-14
                   rounded-xl
                   border-4 border-[#556B2F]
                   flex items-center justify-center
