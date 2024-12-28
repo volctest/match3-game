@@ -139,8 +139,9 @@ function App() {
                   onClick={() => handleCardClick(card)}
                   style={{
                     position: 'absolute',
-                    left: `${card.x * 80 + card.z * 2}px`,
-                    top: `${card.y * 80 + card.z * 2}px`,
+                    left: `${card.x * 60}px`,
+                    top: `${card.y * 60}px`,
+                    transform: `translate(${card.z * 2}px, ${card.z * 2}px)`,
                     zIndex: card.z
                   }}
                   className={`p-4 rounded-xl shadow-xl transition-all ${
