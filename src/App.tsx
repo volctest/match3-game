@@ -140,19 +140,27 @@ function App() {
                   onClick={() => handleCardClick(card)}
                   style={{
                     position: 'absolute',
-                    left: `${card.x * 60}px`,
-                    top: `${card.y * 60}px`,
-                    transform: `translate(${card.z * 2}px, ${card.z * 2}px)`,
+                    left: `${card.x * 60 + card.z * 30}px`,
+                    top: `${card.y * 60 + card.z * 30}px`,
+                    transform: `scale(${1 - (0.05 * (3 - card.z))})`,
+                    opacity: 0.85 + (0.15 * (card.z / 3)),
                     zIndex: card.z
                   }}
-                  className={`p-4 rounded-xl shadow-xl transition-all ${
-                    card.selected 
-                      ? 'bg-blue-200 ring-4 ring-blue-500 scale-95' 
-                      : 'bg-white hover:bg-gray-50'
-                  }`}
+                  className={`
+                    p-4 rounded-xl
+                    border-4 border-[#556B2F]
+                    shadow-lg
+                    transition-all
+                    w-24 h-24
+                    flex items-center justify-center
+                    ${card.selected 
+                      ? 'bg-[#FFFDD0]/80 scale-95 border-[#6B8E23]' 
+                      : 'bg-[#FFFDD0] hover:bg-[#FFFDD0]/90'
+                    }
+                  `}
                   disabled={gameStatus !== 'playing'}
                 >
-                  <Icon className="w-8 h-8" />
+                  <Icon className="w-16 h-16" />
                 </button>
               );
             })}
