@@ -61,17 +61,18 @@ function App() {
           if (removedIds.has(card.id)) {
             return { ...card, visible: false, selected: false };
           }
-          // Update visibility for cards underneath
+          // Only reveal cards from the layer directly below any removed card
           if (!card.visible) {
-            const cardsAbove = cards.filter(c => 
+            const removedCardsAbove = newSelected.filter(c => 
               c.x === card.x && 
               c.y === card.y && 
-              c.z > card.z
+              c.z > card.z &&
+              removedIds.has(c.id)
             );
-            const allAboveRemoved = cardsAbove.every(c => 
-              removedIds.has(c.id) || !c.visible
-            );
-            return { ...card, visible: allAboveRemoved };
+            const isDirectlyBelow = removedCardsAbove.some(c => c.z === card.z + 1);
+            if (isDirectlyBelow) {
+              return { ...card, visible: true };
+            }
           }
           return card;
         });
