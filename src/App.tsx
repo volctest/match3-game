@@ -181,8 +181,8 @@ function App() {
                   style={{
                     position: 'absolute',
                     left: `${(card.x * 32) + (card.z * 16)}px`,
-                    top: `${(card.y * 32) + (card.z * 16)}px`,
-                    transform: card.visible ? 'none' : 'scale(0)',
+                    top: `${(card.y * 32)}px`,
+                    transform: `translate(${card.z * -16}px, ${card.z * 16}px) ${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? (1 - (card.z * 0.1)) : 0,
                     transition: 'all 0.3s ease',
                     zIndex: card.z
