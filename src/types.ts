@@ -1,3 +1,5 @@
+import { IconType } from './assets/icons';
+
 interface Card {
   id: string;
   type: IconType;

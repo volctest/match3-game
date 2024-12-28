@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card } from './types';
-import { ICONS } from './assets/icons';
+import { ICONS, type IconType } from './assets/icons';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 // ICONS imported from './assets/icons'
@@ -12,7 +12,7 @@ function App() {
 
   // Initialize game board
   useEffect(() => {
-    const types = Object.keys(ICONS);
+    const types: IconType[] = ['campfire', 'lettuce', 'scissors', 'yarn', 'glove', 'stump', 'fork', 'carrot', 'hay', 'cotton', 'corn'];
     const initialCards: Card[] = [];
     
     // Create 4 layers of cards
