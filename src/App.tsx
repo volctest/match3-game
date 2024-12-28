@@ -182,8 +182,9 @@ function App() {
                     position: 'absolute',
                     left: `${card.x * 40 + card.z * 20}px`,
                     top: `${card.y * 40 + card.z * 20}px`,
-                    transform: `scale(${1 - (0.1 * (3 - card.z))})`,
-                    opacity: 0.85 + (0.15 * (card.z / 3)),
+                    transform: card.visible ? 'none' : 'scale(0)',
+                    opacity: card.visible ? 1 : 0,
+                    transition: 'all 0.3s ease',
                     zIndex: card.z
                   }}
                   className={`
@@ -191,7 +192,7 @@ function App() {
                     border-4 border-[#556B2F]
                     shadow-lg
                     transition-all
-                    w-16 h-16
+                    w-20 h-20
                     flex items-center justify-center
                     ${isPending 
                       ? 'bg-[#FFFDD0]/60 scale-90 border-yellow-500' 
@@ -202,7 +203,7 @@ function App() {
                   `}
                   disabled={gameStatus !== 'playing' || (!isPending && pendingCard !== null)}
                 >
-                  <Icon className="w-12 h-12" />
+                  <Icon className="w-14 h-14" />
                 </button>
               );
             })}
@@ -213,7 +214,7 @@ function App() {
               <button
                 key={`slot-${index}`}
                 className={`
-                  w-16 h-16
+                  w-20 h-20
                   rounded-xl
                   border-4 border-[#556B2F]
                   flex items-center justify-center
