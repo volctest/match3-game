@@ -55,7 +55,7 @@ function App() {
   }, [cards, slotCards]);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen bg-[#D0FFB0] p-8">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-8">消消乐游戏</h1>
         
@@ -180,30 +180,31 @@ function App() {
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${(card.x * 24) + (card.z * 12)}px`,
-                    top: `${(card.y * 24)}px`,
-                    transform: `translate(${card.z * -12}px, ${card.z * 12}px) ${card.visible ? 'scale(1)' : 'scale(0)'}`,
+                    left: `${(card.x * 35) + (card.z * 35)}px`,
+                    top: `${(card.y * 35) + (card.z * 35)}px`,
+                    transform: `${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? (1 - (card.z * 0.1)) : 0,
                     transition: 'all 0.3s ease',
                     zIndex: card.z
                   }}
                   className={`
-                    p-3 rounded-xl
-                    border-4 border-[#556B2F]
-                    shadow-lg
-                    transition-all
-                    w-14 h-14
+                    p-4 rounded-xl
+                    border-[6px] border-[#556B2F]
+                    shadow-[inset_0_2px_4px_rgba(0,0,0,0.1),0_4px_8px_rgba(0,0,0,0.15)]
+                    transition-all duration-300
+                    w-20 h-20
                     flex items-center justify-center
+                    group
                     ${isPending 
-                      ? 'bg-[#FFFDD0]/60 scale-90 border-yellow-500' 
+                      ? 'bg-[#FFFDD0]/60 scale-90 border-yellow-500 shadow-[0_2px_4px_rgba(0,0,0,0.1)]' 
                       : card.selected 
-                        ? 'bg-[#FFFDD0]/80 scale-95 border-[#6B8E23]' 
-                        : 'bg-[#FFFDD0] hover:bg-[#FFFDD0]/90'
+                        ? 'bg-[#FFFDD0]/80 scale-95 border-[#6B8E23] shadow-[0_3px_6px_rgba(0,0,0,0.1)]' 
+                        : 'bg-[#FFFDD0] hover:bg-[#FFFDD0]/90 hover:shadow-[0_6px_12px_rgba(0,0,0,0.15)] hover:scale-105'
                     }
                   `}
                   disabled={gameStatus !== 'playing' || (!isPending && pendingCard !== null)}
                 >
-                  <Icon className="w-10 h-10" />
+                  <Icon className="w-12 h-12 transform transition-transform group-hover:scale-110 drop-shadow-lg" />
                 </button>
               );
             })}
@@ -214,12 +215,17 @@ function App() {
               <button
                 key={`slot-${index}`}
                 className={`
-                  w-14 h-14
-                  rounded-xl
-                  border-4 border-[#556B2F]
+                  w-20 h-20
+                  p-4 rounded-xl
+                  border-[6px] border-[#556B2F]
+                  shadow-[inset_0_2px_4px_rgba(0,0,0,0.1),0_4px_8px_rgba(0,0,0,0.15)]
                   flex items-center justify-center
-                  ${slotCard ? 'bg-[#FFFDD0]' : 'bg-gray-200'}
-                  transition-all
+                  group
+                  ${slotCard 
+                    ? 'bg-[#FFFDD0] hover:shadow-[0_6px_12px_rgba(0,0,0,0.15)] hover:scale-105' 
+                    : 'bg-gray-200 hover:bg-gray-300'
+                  }
+                  transition-all duration-300
                 `}
                 onClick={() => {
                   if (pendingCard && !slotCard) {
