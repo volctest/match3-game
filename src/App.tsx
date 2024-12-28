@@ -1,18 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Apple, Coffee, Pizza, Car, Home, Book, Music, Camera } from 'lucide-react';
 import { Card } from './types';
+import { ICONS } from './assets/icons';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
-const ICONS = {
-  apple: Apple,
-  coffee: Coffee,
-  pizza: Pizza,
-  car: Car,
-  home: Home,
-  book: Book,
-  music: Music,
-  camera: Camera,
-};
+// ICONS imported from './assets/icons'
 
 function App() {
   const [cards, setCards] = useState<Card[]>([]);
