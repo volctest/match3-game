@@ -72,7 +72,33 @@ function App() {
 
         <div className="flex justify-center gap-4 mb-4">
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => {
+              const types: IconType[] = ['campfire', 'lettuce', 'scissors', 'yarn', 'glove', 'stump', 'fork', 'carrot', 'hay', 'cotton', 'corn'];
+              const initialCards: Card[] = [];
+              
+              // Create 4 layers of cards
+              for (let z = 0; z < 4; z++) {
+                for (let y = 0; y < 4; y++) {
+                  for (let x = 0; x < 4; x++) {
+                    initialCards.push({
+                      id: `${x}-${y}-${z}`,
+                      type: types[Math.floor(Math.random() * types.length)],
+                      visible: z === 3, // Only top layer visible initially
+                      selected: false,
+                      x,
+                      y,
+                      z,
+                    });
+                  }
+                }
+              }
+              
+              setCards(initialCards);
+              setSelectedCards([]);
+              setPendingCard(null);
+              setSlotCards([null, null, null, null, null]);
+              setGameStatus('playing');
+            }}
             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
           >
             重新开始游戏
@@ -154,9 +180,9 @@ function App() {
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${card.x * 60 + card.z * 30}px`,
-                    top: `${card.y * 60 + card.z * 30}px`,
-                    transform: `scale(${1 - (0.05 * (3 - card.z))})`,
+                    left: `${card.x * 40 + card.z * 20}px`,
+                    top: `${card.y * 40 + card.z * 20}px`,
+                    transform: `scale(${1 - (0.1 * (3 - card.z))})`,
                     opacity: 0.85 + (0.15 * (card.z / 3)),
                     zIndex: card.z
                   }}
@@ -165,7 +191,7 @@ function App() {
                     border-4 border-[#556B2F]
                     shadow-lg
                     transition-all
-                    w-24 h-24
+                    w-16 h-16
                     flex items-center justify-center
                     ${isPending 
                       ? 'bg-[#FFFDD0]/60 scale-90 border-yellow-500' 
@@ -176,7 +202,7 @@ function App() {
                   `}
                   disabled={gameStatus !== 'playing' || (!isPending && pendingCard !== null)}
                 >
-                  <Icon className="w-16 h-16" />
+                  <Icon className="w-12 h-12" />
                 </button>
               );
             })}
@@ -186,6 +212,14 @@ function App() {
             {slotCards.map((slotCard, index) => (
               <button
                 key={`slot-${index}`}
+                className={`
+                  w-16 h-16
+                  rounded-xl
+                  border-4 border-[#556B2F]
+                  flex items-center justify-center
+                  ${slotCard ? 'bg-[#FFFDD0]' : 'bg-gray-200'}
+                  transition-all
+                `}
                 onClick={() => {
                   if (pendingCard && !slotCard) {
                     // Place pending card in empty slot
@@ -208,18 +242,7 @@ function App() {
                     setSlotCards(newSlots);
                   }
                 }}
-                className={`
-                  w-24 h-24
-                  rounded-xl
-                  border-4 border-[#556B2F]
-                  transition-all
-                  flex items-center justify-center
-                  ${slotCard 
-                    ? 'bg-[#FFFDD0] hover:bg-[#FFFDD0]/90' 
-                    : 'bg-gray-200 hover:bg-gray-300'
-                  }
-                  ${pendingCard && !slotCard ? 'border-yellow-500' : ''}
-                `}
+
                 disabled={gameStatus !== 'playing'}
               >
                 {slotCard && React.createElement(ICONS[slotCard.type], {
