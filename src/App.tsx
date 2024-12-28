@@ -127,7 +127,7 @@ function App() {
           </button>
         </div>
 
-        <div className="grid grid-cols-4 gap-6">
+        <div className="grid grid-cols-4 gap-2">
           {cards
             .filter(card => card.visible)
             .map(card => {
@@ -136,7 +136,7 @@ function App() {
                 <button
                   key={card.id}
                   onClick={() => handleCardClick(card)}
-                  className={`p-12 rounded-xl shadow-xl transition-all transform hover:scale-105 ${
+                  className={`p-4 rounded-xl shadow-xl transition-all transform hover:scale-105 ${
                     card.selected 
                       ? 'bg-blue-200 ring-4 ring-blue-500 scale-95' 
                       : 'bg-white hover:bg-gray-50'
