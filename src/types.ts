@@ -1,6 +1,8 @@
+import { IconType } from './assets/icons';
+
 interface Card {
   id: string;
-  type: string;
+  type: IconType;
   visible: boolean;
   selected: boolean;
   x: number;
