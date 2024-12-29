@@ -90,7 +90,7 @@ function App() {
                     initialCards.push({
                       id: `${x}-${y}-${z}`,
                       type: types[Math.floor(Math.random() * types.length)],
-                      visible: z === 0, // Only bottom layer visible initially
+                      visible: z === 3, // Only top layer visible initially
                       selected: false,
                       x,
                       y,
@@ -218,9 +218,9 @@ function App() {
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${(card.x * 80)}px`,
-                    top: `${(card.y * 80)}px`,
-                    transform: `translate(-50%, -50%) ${card.visible ? 'scale(1)' : 'scale(0)'}`,
+                    left: `${(card.x * 60 + (card.z * 30))}px`,
+                    top: `${(card.y * 60 + (card.z * 30))}px`,
+                    transform: `${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? 1 : 0,
                     transition: 'all 0.3s ease',
                     zIndex: card.z
@@ -230,7 +230,7 @@ function App() {
                     border-[6px] border-[#556B2F]
                     shadow-[inset_0_2px_4px_rgba(0,0,0,0.1),0_4px_8px_rgba(0,0,0,0.15)]
                     transition-all duration-300
-                    w-[80px] h-[80px]
+                    w-[60px] h-[60px]
                     flex items-center justify-center
                     group
                     ${isPending 
