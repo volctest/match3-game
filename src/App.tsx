@@ -154,46 +154,31 @@ function App() {
                 <button
                   key={card.id}
                   onClick={() => {
-                    // Handle matching logic
-                    const newSelectedCards = [...selectedCards, card];
-                    
                     // Handle card selection and matching
-                    if (selectedCards.length === 2) {
-                      // If we already have 2 cards selected
-                      if (selectedCards[0].type === selectedCards[1].type && card.type === selectedCards[0].type) {
-                        // All three cards match - remove them
-                        const removedIds = new Set(newSelectedCards.map(c => c.id));
-                        let updatedCards = cards.map(c => ({
-                          ...c,
-                          visible: removedIds.has(c.id) ? false : c.visible,
-                          selected: false
-                        }));
+                    const newSelectedCards = [...selectedCards, card];
 
-                        // Check each layer from top to bottom
-                        for (let layer = 3; layer >= 0; layer--) {
-                          const layerStillHasVisible = updatedCards.some(c => c.z === layer && c.visible);
-                          if (!layerStillHasVisible && layer > 0) {
-                            // Reveal the next layer down
-                            updatedCards = updatedCards.map(c => {
-                              if (c.z === layer - 1) {
-                                return { ...c, visible: true };
-                              }
-                              return c;
-                            });
-                          }
-                        }
+                    // Check if new card matches existing selection pattern
+                    if (selectedCards.length === 2 && selectedCards[0].type === selectedCards[1].type && card.type !== selectedCards[0].type) {
+                      // Reset selection if third card doesn't match pattern
+                      setSelectedCards([card]);
+                      const updatedCards = cards.map(c => ({
+                        ...c,
+                        selected: c.id === card.id
+                      }));
+                      setCards(updatedCards);
+                      return;
+                    }
 
-                        // Update game state
-                        setCards(updatedCards);
-                        setSelectedCards([]);
-
-                        // Check if any cards are still visible
-                        const hasVisibleCards = updatedCards.some(c => c.visible);
-                        if (!hasVisibleCards) {
-                          setGameStatus('won');
-                        }
-                        return;
-                      }
+                    // Check if new card matches existing single card
+                    if (selectedCards.length === 1 && card.type !== selectedCards[0].type) {
+                      // Reset selection if second card doesn't match pattern
+                      setSelectedCards([card]);
+                      const updatedCards = cards.map(c => ({
+                        ...c,
+                        selected: c.id === card.id
+                      }));
+                      setCards(updatedCards);
+                      return;
                     }
 
                     // Update selection state for matching cards
@@ -203,6 +188,7 @@ function App() {
                     }));
                     setCards(updatedCards);
                     setSelectedCards(newSelectedCards);
+
                     if (newSelectedCards.length === 3) {
                       // Check if all three cards match
                       if (newSelectedCards.every(c => c.type === newSelectedCards[0].type)) {
@@ -252,8 +238,8 @@ function App() {
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${(card.x * 60 + (card.z * 30)) - (10 * 30)}px`,
-                    top: `${(card.y * 60 + (card.z * 30)) - (8 * 30)}px`,
+                    left: `${(card.x * 60) + (card.z * 30) + 200}px`,
+                    top: `${(card.y * 60) + (card.z * 30) + 100}px`,
                     transform: `${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? 1 : 0,
                     transition: 'all 0.3s ease',
@@ -269,7 +255,7 @@ function App() {
                     group
                     ${card.selected 
                       ? 'bg-green-100 scale-95 border-green-500 shadow-[0_0_15px_rgba(22,163,74,0.5)]' 
-                      : 'bg-[#FFFDD0] border-transparent hover:bg-[#FFFDD0]/90 hover:shadow-[0_6px_12px_rgba(0,0,0,0.15)] hover:scale-105'
+                      : 'bg-[#FFFDD0] border-green-200 hover:border-green-300'
                     }
                   `}
                   disabled={gameStatus !== 'playing'}
@@ -287,15 +273,15 @@ function App() {
                 className={`
                   w-[80px] h-[80px]
                   p-0 rounded-xl
-                  border-[6px] border-[#556B2F]
+                  border-[6px]
                   shadow-[inset_0_2px_4px_rgba(0,0,0,0.1),0_4px_8px_rgba(0,0,0,0.15)]
                   flex items-center justify-center
                   group
                   ${slotCard 
                     ? (selectedCards.includes(slotCard) 
                       ? 'bg-green-100 scale-95 border-green-500 shadow-[0_0_15px_rgba(22,163,74,0.5)]'
-                      : 'bg-[#FFFDD0] hover:shadow-[0_6px_12px_rgba(0,0,0,0.15)] hover:scale-105')
-                    : 'bg-gray-200 hover:bg-gray-300'
+                      : 'bg-[#FFFDD0] border-green-200 hover:border-green-300')
+                    : 'bg-gray-200 border-green-100 hover:border-green-200'
                   }
                   transition-all duration-300
                 `}
