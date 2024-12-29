@@ -17,10 +17,10 @@ function App() {
     const types: IconType[] = ['campfire', 'lettuce', 'scissors', 'yarn', 'glove', 'stump', 'fork', 'carrot', 'hay', 'cotton', 'corn'];
     const initialCards: Card[] = [];
     
-    // Create 4 layers of cards
+    // Create layers of cards (10x8 grid)
     for (let z = 0; z < 4; z++) {
-      for (let y = 0; y < 4; y++) {
-        for (let x = 0; x < 4; x++) {
+      for (let y = 0; y < 8; y++) {
+        for (let x = 0; x < 10; x++) {
           initialCards.push({
             id: `${x}-${y}-${z}`,
             type: types[Math.floor(Math.random() * types.length)],
@@ -39,24 +39,31 @@ function App() {
 
   // Check for game over conditions after each card removal
   useEffect(() => {
+    if (cards.length === 0) return; // Don't check until game is initialized
+    
     const visibleCards = cards.filter(c => c.visible);
-    if (visibleCards.length === 0) {
-      setGameStatus('won');
-    } else {
-      // Check for possible matches including slot cards
-      const allPlayableCards = [...visibleCards, ...slotCards.filter((c): c is Card => c !== null)];
+    const slotCardsArray = slotCards.filter((c): c is Card => c !== null);
+    const allPlayableCards = [...visibleCards, ...slotCardsArray];
+    
+    // Only check win/lose if we have cards in play
+    if (allPlayableCards.length > 0) {
+      // Check for possible matches
       const hasMatch = allPlayableCards.some(card1 =>
         allPlayableCards.filter(c => c.type === card1.type).length >= 3
       );
+      
       if (!hasMatch) {
         setGameStatus('lost');
       }
+    } else if (cards.every(card => !card.visible)) {
+      // Win if all cards are cleared
+      setGameStatus('won');
     }
   }, [cards, slotCards]);
 
   return (
-    <div className="min-h-screen bg-[#D0FFB0] p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-[#D0FFB0] p-8 flex justify-center">
+      <div className="w-full max-w-[1200px]">
         <h1 className="text-4xl font-bold text-center mb-8">消消乐游戏</h1>
         
         {gameStatus !== 'playing' && (
@@ -76,14 +83,14 @@ function App() {
               const types: IconType[] = ['campfire', 'lettuce', 'scissors', 'yarn', 'glove', 'stump', 'fork', 'carrot', 'hay', 'cotton', 'corn'];
               const initialCards: Card[] = [];
               
-              // Create 4 layers of cards
+              // Create layers of cards (10x8 grid)
               for (let z = 0; z < 4; z++) {
-                for (let y = 0; y < 4; y++) {
-                  for (let x = 0; x < 4; x++) {
+                for (let y = 0; y < 8; y++) {
+                  for (let x = 0; x < 10; x++) {
                     initialCards.push({
                       id: `${x}-${y}-${z}`,
                       type: types[Math.floor(Math.random() * types.length)],
-                      visible: z === 3, // Only top layer visible initially
+                      visible: z === 0, // Only bottom layer visible initially
                       selected: false,
                       x,
                       y,
@@ -140,7 +147,7 @@ function App() {
           </button>
         </div>
 
-        <div className="relative w-full h-[600px] py-8">
+        <div className="relative w-full h-[800px] flex items-center justify-center bg-[#D0FFB0]/50 rounded-lg">
           {cards
             .filter(card => card.visible)
             .map(card => {
@@ -150,39 +157,70 @@ function App() {
                 <button
                   key={card.id}
                   onClick={() => {
-                    if (pendingCard) {
-                      // If we have a pending card and click another card, try to match
-                      if (pendingCard.type === card.type) {
-                        const matchingCards = [...selectedCards, card, pendingCard];
-                        if (matchingCards.length === 3) {
-                          // Remove matched cards
-                          const removedIds = new Set(matchingCards.map(c => c.id));
-                          const updatedCards = cards.map(c => ({
-                            ...c,
-                            visible: removedIds.has(c.id) ? false : c.visible,
-                            selected: false
-                          }));
-                          setCards(updatedCards);
-                          setSelectedCards([]);
-                          setPendingCard(null);
-                        } else {
-                          setSelectedCards(matchingCards);
+                    // If no cards are selected and no card is pending, prepare for slot transfer
+                    if (selectedCards.length === 0 && !pendingCard) {
+                      setPendingCard(card);
+                      const updatedCards = cards.map(c => ({
+                        ...c,
+                        selected: c.id === card.id,
+                      }));
+                      setCards(updatedCards);
+                      return;
+                    }
+
+                    // If there's a pending card and it's not this card, clear it
+                    if (pendingCard && pendingCard.id !== card.id) {
+                      setPendingCard(null);
+                    }
+
+                    // Handle matching logic
+                    const updatedCards = cards.map(c => ({
+                      ...c,
+                      selected: c.id === card.id ? !c.selected : c.selected
+                    }));
+                    setCards(updatedCards);
+
+                    const newSelectedCards = [...selectedCards, card];
+                    if (newSelectedCards.length === 3) {
+                      // Check if all three cards match
+                      if (newSelectedCards.every(c => c.type === card.type)) {
+                        // Remove matched cards and reveal next layer if needed
+                        const removedIds = new Set(newSelectedCards.map(c => c.id));
+                        let updatedCards = cards.map(c => ({
+                          ...c,
+                          visible: removedIds.has(c.id) ? false : c.visible,
+                          selected: false
+                        }));
+
+                        // Check each layer from top to bottom
+                        for (let layer = 3; layer >= 0; layer--) {
+                          const layerStillHasVisible = updatedCards.some(c => c.z === layer && c.visible);
+                          if (!layerStillHasVisible && layer > 0) {
+                            // Reveal the next layer down
+                            updatedCards = updatedCards.map(c => {
+                              if (c.z === layer - 1) {
+                                return { ...c, visible: true };
+                              }
+                              return c;
+                            });
+                          }
                         }
-                      } else {
+
+                        setCards(updatedCards);
+                        setSelectedCards([]);
                         setPendingCard(null);
+                      } else {
                         setSelectedCards([]);
                       }
                     } else {
-                      // Set this card as pending for slot placement or matching
-                      setPendingCard(card);
-                      setSelectedCards([card]);
+                      setSelectedCards(newSelectedCards);
                     }
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${(card.x * 80) - (card.z * 40)}px`,
-                    top: `${(card.y * 80) - (card.z * 40)}px`,
-                    transform: `${card.visible ? 'scale(1)' : 'scale(0)'}`,
+                    left: `${(card.x * 80)}px`,
+                    top: `${(card.y * 80)}px`,
+                    transform: `translate(-50%, -50%) ${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? 1 : 0,
                     transition: 'all 0.3s ease',
                     zIndex: card.z
@@ -202,7 +240,7 @@ function App() {
                         : 'bg-[#FFFDD0] hover:bg-[#FFFDD0]/90 hover:shadow-[0_6px_12px_rgba(0,0,0,0.15)] hover:scale-105'
                     }
                   `}
-                  disabled={gameStatus !== 'playing'}
+                  disabled={gameStatus !== 'playing' || card.id === pendingCard?.id}
                 >
                   <Icon className="w-12 h-12 transform transition-transform group-hover:scale-110 drop-shadow-lg" />
                 </button>
