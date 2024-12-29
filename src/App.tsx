@@ -145,7 +145,7 @@ function App() {
           </button>
         </div>
 
-        <div className="relative w-full h-[800px] flex items-center justify-center bg-[#D0FFB0]/50 rounded-lg z-10 mx-auto overflow-hidden">
+        <div className="relative w-full h-[600px] flex items-center justify-center bg-[#D0FFB0]/50 rounded-lg z-10 mx-auto overflow-visible">
           {cards
             .filter(card => card.visible)
             .map(card => {
@@ -154,41 +154,35 @@ function App() {
                 <button
                   key={card.id}
                   onClick={() => {
-                    // Handle card selection and matching
+                    // Check if clicking a different type after selecting cards
+                    if (selectedCards.length > 0 && !card.selected && card.type !== selectedCards[0].type) {
+                      // Reset selection if clicking different type
+                      setSelectedCards([]);
+                      setCards(cards.map(c => ({
+                        ...c,
+                        selected: false
+                      })));
+                      return;
+                    }
+
+                    if (card.selected) {
+                      // Deselect if clicking the same card
+                      setSelectedCards(selectedCards.filter(c => c.id !== card.id));
+                      setCards(cards.map(c => 
+                        c.id === card.id ? { ...c, selected: false } : c
+                      ));
+                      return;
+                    }
+
+                    // Add the new card to selection
                     const newSelectedCards = [...selectedCards, card];
-
-                    // Check if new card matches existing selection pattern
-                    if (selectedCards.length === 2 && selectedCards[0].type === selectedCards[1].type && card.type !== selectedCards[0].type) {
-                      // Reset selection if third card doesn't match pattern
-                      setSelectedCards([card]);
-                      const updatedCards = cards.map(c => ({
-                        ...c,
-                        selected: c.id === card.id
-                      }));
-                      setCards(updatedCards);
-                      return;
-                    }
-
-                    // Check if new card matches existing single card
-                    if (selectedCards.length === 1 && card.type !== selectedCards[0].type) {
-                      // Reset selection if second card doesn't match pattern
-                      setSelectedCards([card]);
-                      const updatedCards = cards.map(c => ({
-                        ...c,
-                        selected: c.id === card.id
-                      }));
-                      setCards(updatedCards);
-                      return;
-                    }
-
-                    // Update selection state for matching cards
-                    const updatedCards = cards.map(c => ({
+                    
+                    // Update card selection state with consistent green color
+                    setCards(cards.map(c => ({
                       ...c,
                       selected: newSelectedCards.some(sc => sc.id === c.id)
-                    }));
-                    setCards(updatedCards);
-                    setSelectedCards(newSelectedCards);
-
+                    })));
+                    
                     if (newSelectedCards.length === 3) {
                       // Check if all three cards match
                       if (newSelectedCards.every(c => c.type === newSelectedCards[0].type)) {
@@ -225,11 +219,7 @@ function App() {
                         }
                       } else {
                         // Reset selection if three cards don't match
-                        const updatedCards = cards.map(c => ({
-                          ...c,
-                          selected: false
-                        }));
-                        setCards(updatedCards);
+                        setCards(cards.map(c => ({ ...c, selected: false })));
                         setSelectedCards([]);
                       }
                     } else {
@@ -238,8 +228,8 @@ function App() {
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${(card.x * 60) + (card.z * 30) + 200}px`,
-                    top: `${(card.y * 60) + (card.z * 30) + 100}px`,
+                    left: `${(card.x * 30) + (card.z * 15) + 500}px`,
+                    top: `${(card.y * 30) + (card.z * 15) + 150}px`,
                     transform: `${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? 1 : 0,
                     transition: 'all 0.3s ease',
@@ -250,7 +240,7 @@ function App() {
                     border-[6px]
                     shadow-[inset_0_2px_4px_rgba(0,0,0,0.1),0_4px_8px_rgba(0,0,0,0.15)]
                     transition-all duration-300
-                    w-[60px] h-[60px]
+                    w-[40px] h-[40px]
                     flex items-center justify-center
                     group
                     ${card.selected 
@@ -260,7 +250,7 @@ function App() {
                   `}
                   disabled={gameStatus !== 'playing'}
                 >
-                  <Icon className="w-12 h-12 transform transition-transform group-hover:scale-110 drop-shadow-lg" />
+                  <Icon className="w-8 h-8 transform transition-transform group-hover:scale-110 drop-shadow-lg" />
                 </button>
               );
             })}
