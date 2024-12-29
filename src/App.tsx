@@ -5,6 +5,10 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 // ICONS imported from './assets/icons'
 
+// Card dimensions including padding and border
+const CARD_WIDTH = 124; // 80px + 2×16px padding + 2×6px border
+const CARD_HEIGHT = 124;
+
 function App() {
   const [cards, setCards] = useState<Card[]>([]);
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
@@ -140,7 +144,7 @@ function App() {
           </button>
         </div>
 
-        <div className="relative w-full h-[800px] py-8">
+        <div className="relative w-full h-[1000px] py-8 overflow-visible">
           {cards
             .filter(card => card.visible)
             .map(card => {
@@ -180,12 +184,12 @@ function App() {
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${(card.x * 150) - ((3 - card.z) * 75)}px`,
-                    top: `${(card.y * 150) - ((3 - card.z) * 75)}px`,
+                    left: `${(card.x * (CARD_WIDTH + 8)) + (card.z * ((CARD_WIDTH + 8) / 2))}px`,
+                    top: `${(card.y * (CARD_HEIGHT + 8)) + (card.z * ((CARD_HEIGHT + 8) / 2))}px`,
                     transform: `${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? 1 : 0,
                     transition: 'all 0.3s ease',
-                    zIndex: card.z
+                    zIndex: card.z * 10
                   }}
                   className={`
                     p-4 rounded-xl
