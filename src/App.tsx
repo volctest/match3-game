@@ -10,7 +10,6 @@ function App() {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [gameStatus, setGameStatus] = useState<'playing' | 'won' | 'lost'>('playing');
   const [slotCards, setSlotCards] = useState<(Card | null)[]>([null, null, null, null, null]);
-  const [pendingCard, setPendingCard] = useState<Card | null>(null);
 
   // Initialize game board
   useEffect(() => {
@@ -102,7 +101,6 @@ function App() {
               
               setCards(initialCards);
               setSelectedCards([]);
-              setPendingCard(null);
               setSlotCards([null, null, null, null, null]);
               setGameStatus('playing');
             }}
@@ -152,51 +150,80 @@ function App() {
             .filter(card => card.visible)
             .map(card => {
               const Icon = ICONS[card.type as keyof typeof ICONS];
-              const isPending = pendingCard?.id === card.id;
               return (
                 <button
                   key={card.id}
                   onClick={() => {
-                    // If no cards are selected and no card is pending, prepare for slot transfer
-                    if (selectedCards.length === 0 && !pendingCard) {
-                      setPendingCard(card);
-                      const updatedCards = cards.map(c => ({
-                        ...c,
-                        selected: c.id === card.id,
-                      }));
-                      setCards(updatedCards);
-                      return;
-                    }
-
-                    // If there's a pending card and it's not this card, clear it
-                    if (pendingCard && pendingCard.id !== card.id) {
-                      setPendingCard(null);
-                    }
-
                     // Handle matching logic
                     const newSelectedCards = [...selectedCards, card];
                     
-                    // Check if we have two cards selected and the third is different
+                    // Handle card selection and matching
                     if (selectedCards.length === 2) {
-                      if (selectedCards[0].type === selectedCards[1].type && card.type !== selectedCards[0].type) {
-                        // Reset selection if third card doesn't match
+                      // If we already have 2 cards selected
+                      if (selectedCards[0].type === selectedCards[1].type && card.type === selectedCards[0].type) {
+                        // All three cards match - remove them
+                        const removedIds = new Set(newSelectedCards.map(c => c.id));
+                        let updatedCards = cards.map(c => ({
+                          ...c,
+                          visible: removedIds.has(c.id) ? false : c.visible,
+                          selected: false
+                        }));
+
+                        // Check each layer from top to bottom
+                        for (let layer = 3; layer >= 0; layer--) {
+                          const layerStillHasVisible = updatedCards.some(c => c.z === layer && c.visible);
+                          if (!layerStillHasVisible && layer > 0) {
+                            // Reveal the next layer down
+                            updatedCards = updatedCards.map(c => {
+                              if (c.z === layer - 1) {
+                                return { ...c, visible: true };
+                              }
+                              return c;
+                            });
+                          }
+                        }
+
+                        // Update game state
+                        setCards(updatedCards);
                         setSelectedCards([]);
+
+                        // Check if any cards are still visible
+                        const hasVisibleCards = updatedCards.some(c => c.visible);
+                        if (!hasVisibleCards) {
+                          setGameStatus('won');
+                        }
+                        return;
+                      } else {
+                        // Third card doesn't match - clear selection
+                        setSelectedCards([card]);
                         const updatedCards = cards.map(c => ({
                           ...c,
-                          selected: false
+                          selected: c.id === card.id
                         }));
                         setCards(updatedCards);
                         return;
                       }
                     }
 
-                    // Update card selection state
+                    // Check if new card matches existing selection
+                    if (selectedCards.length === 1 && card.type !== selectedCards[0].type) {
+                      // Reset selection if new card doesn't match pattern
+                      setSelectedCards([card]);
+                      const updatedCards = cards.map(c => ({
+                        ...c,
+                        selected: c.id === card.id
+                      }));
+                      setCards(updatedCards);
+                      return;
+                    }
+
+                    // Update selection state for matching cards
+                    setSelectedCards(newSelectedCards);
                     const updatedCards = cards.map(c => ({
                       ...c,
-                      selected: c.id === card.id ? true : (selectedCards.find(sc => sc.id === c.id) ? true : false)
+                      selected: newSelectedCards.some(sc => sc.id === c.id)
                     }));
                     setCards(updatedCards);
-                    
                     if (newSelectedCards.length === 3) {
                       // Check if all three cards match
                       if (newSelectedCards.every(c => c.type === newSelectedCards[0].type)) {
@@ -225,7 +252,6 @@ function App() {
                         // Update game state
                         setCards(updatedCards);
                         setSelectedCards([]);
-                        setPendingCard(null);
 
                         // Check if any cards are still visible
                         const hasVisibleCards = updatedCards.some(c => c.visible);
@@ -247,8 +273,8 @@ function App() {
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${(card.x * 70 + (card.z * 35) - (10 * 70 / 2))}px`,
-                    top: `${(card.y * 70 + (card.z * 35) - (8 * 70 / 2))}px`,
+                    left: `${(card.x * 60 + (card.z * 20) - (10 * 60 / 2) + 350)}px`,
+                    top: `${(card.y * 60 + (card.z * 20) - (8 * 60 / 2) + 250)}px`,
                     transform: `${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? 1 : 0,
                     transition: 'all 0.3s ease',
@@ -256,20 +282,18 @@ function App() {
                   }}
                   className={`
                     p-0 rounded-xl
-                    border-[6px] border-[#556B2F]
+                    border-[6px]
                     shadow-[inset_0_2px_4px_rgba(0,0,0,0.1),0_4px_8px_rgba(0,0,0,0.15)]
                     transition-all duration-300
                     w-[60px] h-[60px]
                     flex items-center justify-center
                     group
-                    ${isPending 
-                      ? 'bg-yellow-100 scale-90 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.5)]' 
-                      : card.selected 
-                        ? 'bg-green-100 scale-95 border-green-600 shadow-[0_0_15px_rgba(22,163,74,0.5)]' 
-                        : 'bg-[#FFFDD0] hover:bg-[#FFFDD0]/90 hover:shadow-[0_6px_12px_rgba(0,0,0,0.15)] hover:scale-105'
+                    ${card.selected 
+                      ? 'bg-green-100 scale-95 border-green-500 shadow-[0_0_15px_rgba(22,163,74,0.5)]' 
+                      : 'bg-[#FFFDD0] border-transparent hover:bg-[#FFFDD0]/90 hover:shadow-[0_6px_12px_rgba(0,0,0,0.15)] hover:scale-105'
                     }
                   `}
-                  disabled={gameStatus !== 'playing' || card.id === pendingCard?.id}
+                  disabled={gameStatus !== 'playing'}
                 >
                   <Icon className="w-12 h-12 transform transition-transform group-hover:scale-110 drop-shadow-lg" />
                 </button>
@@ -289,27 +313,28 @@ function App() {
                   flex items-center justify-center
                   group
                   ${slotCard 
-                    ? 'bg-[#FFFDD0] hover:shadow-[0_6px_12px_rgba(0,0,0,0.15)] hover:scale-105' 
+                    ? (selectedCards.includes(slotCard) 
+                      ? 'bg-green-100 scale-95 border-green-500 shadow-[0_0_15px_rgba(22,163,74,0.5)]'
+                      : 'bg-[#FFFDD0] hover:shadow-[0_6px_12px_rgba(0,0,0,0.15)] hover:scale-105')
                     : 'bg-gray-200 hover:bg-gray-300'
                   }
                   transition-all duration-300
                 `}
                 onClick={() => {
-                  if (pendingCard && !slotCard) {
-                    // Place pending card in empty slot
+                  if (selectedCards.length > 0 && !slotCard) {
+                    // Place selected card in empty slot
+                    const selectedCard = selectedCards[selectedCards.length - 1];
                     const newSlots = [...slotCards];
-                    newSlots[index] = pendingCard;
+                    newSlots[index] = selectedCard;
                     setSlotCards(newSlots);
                     // Hide the card from the board
                     setCards(cards.map(c => 
-                      c.id === pendingCard.id ? { ...c, visible: false } : c
+                      c.id === selectedCard.id ? { ...c, visible: false, selected: false } : c
                     ));
-                    setPendingCard(null);
                     setSelectedCards([]);
-                  } else if (slotCard && !pendingCard) {
+                  } else if (slotCard) {
                     // Select card from slot
-                    setPendingCard(slotCard);
-                    setSelectedCards([slotCard]);
+                    setSelectedCards([...selectedCards, slotCard]);
                     // Remove card from slot
                     const newSlots = [...slotCards];
                     newSlots[index] = null;
