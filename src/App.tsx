@@ -140,7 +140,7 @@ function App() {
           </button>
         </div>
 
-        <div className="relative w-full h-[800px] py-8">
+        <div className="relative w-full h-[600px] py-8">
           {cards
             .filter(card => card.visible)
             .map(card => {
@@ -180,19 +180,19 @@ function App() {
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${(card.x * 150) - ((3 - card.z) * 75)}px`,
-                    top: `${(card.y * 150) - ((3 - card.z) * 75)}px`,
+                    left: `${(card.x * 80) - (card.z * 40)}px`,
+                    top: `${(card.y * 80) - (card.z * 40)}px`,
                     transform: `${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? 1 : 0,
                     transition: 'all 0.3s ease',
                     zIndex: card.z
                   }}
                   className={`
-                    p-4 rounded-xl
+                    p-0 rounded-xl
                     border-[6px] border-[#556B2F]
                     shadow-[inset_0_2px_4px_rgba(0,0,0,0.1),0_4px_8px_rgba(0,0,0,0.15)]
                     transition-all duration-300
-                    w-20 h-20
+                    w-[80px] h-[80px]
                     flex items-center justify-center
                     group
                     ${isPending 
@@ -202,7 +202,7 @@ function App() {
                         : 'bg-[#FFFDD0] hover:bg-[#FFFDD0]/90 hover:shadow-[0_6px_12px_rgba(0,0,0,0.15)] hover:scale-105'
                     }
                   `}
-                  disabled={gameStatus !== 'playing' || (!isPending && pendingCard !== null)}
+                  disabled={gameStatus !== 'playing'}
                 >
                   <Icon className="w-12 h-12 transform transition-transform group-hover:scale-110 drop-shadow-lg" />
                 </button>
@@ -215,8 +215,8 @@ function App() {
               <button
                 key={`slot-${index}`}
                 className={`
-                  w-20 h-20
-                  p-4 rounded-xl
+                  w-[80px] h-[80px]
+                  p-0 rounded-xl
                   border-[6px] border-[#556B2F]
                   shadow-[inset_0_2px_4px_rgba(0,0,0,0.1),0_4px_8px_rgba(0,0,0,0.15)]
                   flex items-center justify-center
