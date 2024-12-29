@@ -145,7 +145,7 @@ function App() {
           </button>
         </div>
 
-        <div className="relative w-full h-[800px] flex items-center justify-center bg-[#D0FFB0]/50 rounded-lg z-10 mx-auto">
+        <div className="relative w-full h-[800px] flex items-center justify-center bg-[#D0FFB0]/50 rounded-lg z-10 mx-auto overflow-hidden">
           {cards
             .filter(card => card.visible)
             .map(card => {
@@ -193,37 +193,16 @@ function App() {
                           setGameStatus('won');
                         }
                         return;
-                      } else {
-                        // Third card doesn't match - clear selection
-                        setSelectedCards([card]);
-                        const updatedCards = cards.map(c => ({
-                          ...c,
-                          selected: c.id === card.id
-                        }));
-                        setCards(updatedCards);
-                        return;
                       }
                     }
 
-                    // Check if new card matches existing selection
-                    if (selectedCards.length === 1 && card.type !== selectedCards[0].type) {
-                      // Reset selection if new card doesn't match pattern
-                      setSelectedCards([card]);
-                      const updatedCards = cards.map(c => ({
-                        ...c,
-                        selected: c.id === card.id
-                      }));
-                      setCards(updatedCards);
-                      return;
-                    }
-
                     // Update selection state for matching cards
-                    setSelectedCards(newSelectedCards);
                     const updatedCards = cards.map(c => ({
                       ...c,
                       selected: newSelectedCards.some(sc => sc.id === c.id)
                     }));
                     setCards(updatedCards);
+                    setSelectedCards(newSelectedCards);
                     if (newSelectedCards.length === 3) {
                       // Check if all three cards match
                       if (newSelectedCards.every(c => c.type === newSelectedCards[0].type)) {
@@ -273,8 +252,8 @@ function App() {
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${(card.x * 60 + (card.z * 20) - (10 * 60 / 2) + 350)}px`,
-                    top: `${(card.y * 60 + (card.z * 20) - (8 * 60 / 2) + 250)}px`,
+                    left: `${(card.x * 60 + (card.z * 30)) - (10 * 30)}px`,
+                    top: `${(card.y * 60 + (card.z * 30)) - (8 * 30)}px`,
                     transform: `${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? 1 : 0,
                     transition: 'all 0.3s ease',
