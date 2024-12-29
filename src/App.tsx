@@ -147,7 +147,7 @@ function App() {
           </button>
         </div>
 
-        <div className="relative w-full h-[800px] flex items-center justify-center bg-[#D0FFB0]/50 rounded-lg">
+        <div className="relative w-full h-[800px] flex items-center justify-center bg-[#D0FFB0]/50 rounded-lg" style={{ marginLeft: '-100px' }}>
           {cards
             .filter(card => card.visible)
             .map(card => {
@@ -218,8 +218,8 @@ function App() {
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${(card.x * 60 + (card.z * 30))}px`,
-                    top: `${(card.y * 60 + (card.z * 30))}px`,
+                    left: `${(card.x * 60 + (card.z * 15))}px`,
+                    top: `${(card.y * 60 + (card.z * 15))}px`,
                     transform: `${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? 1 : 0,
                     transition: 'all 0.3s ease',
@@ -234,9 +234,9 @@ function App() {
                     flex items-center justify-center
                     group
                     ${isPending 
-                      ? 'bg-[#FFFDD0]/60 scale-90 border-yellow-500 shadow-[0_2px_4px_rgba(0,0,0,0.1)]' 
+                      ? 'bg-yellow-100 scale-90 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.5)]' 
                       : card.selected 
-                        ? 'bg-[#FFFDD0]/80 scale-95 border-[#6B8E23] shadow-[0_3px_6px_rgba(0,0,0,0.1)]' 
+                        ? 'bg-green-100 scale-95 border-green-600 shadow-[0_0_15px_rgba(22,163,74,0.5)]' 
                         : 'bg-[#FFFDD0] hover:bg-[#FFFDD0]/90 hover:shadow-[0_6px_12px_rgba(0,0,0,0.15)] hover:scale-105'
                     }
                   `}
