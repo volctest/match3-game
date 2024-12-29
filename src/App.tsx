@@ -77,7 +77,7 @@ function App() {
           </Alert>
         )}
 
-        <div className="flex justify-center gap-4 mb-4">
+        <div className="flex justify-center gap-4 mb-4 relative z-50">
           <button
             onClick={() => {
               const types: IconType[] = ['campfire', 'lettuce', 'scissors', 'yarn', 'glove', 'stump', 'fork', 'carrot', 'hay', 'cotton', 'corn'];
@@ -147,7 +147,7 @@ function App() {
           </button>
         </div>
 
-        <div className="relative w-full h-[800px] flex items-center justify-center bg-[#D0FFB0]/50 rounded-lg" style={{ marginLeft: '-100px' }}>
+        <div className="relative w-full h-[800px] flex items-center justify-center bg-[#D0FFB0]/50 rounded-lg z-10 mx-auto">
           {cards
             .filter(card => card.visible)
             .map(card => {
@@ -174,16 +174,32 @@ function App() {
                     }
 
                     // Handle matching logic
+                    const newSelectedCards = [...selectedCards, card];
+                    
+                    // Check if we have two cards selected and the third is different
+                    if (selectedCards.length === 2) {
+                      if (selectedCards[0].type === selectedCards[1].type && card.type !== selectedCards[0].type) {
+                        // Reset selection if third card doesn't match
+                        setSelectedCards([]);
+                        const updatedCards = cards.map(c => ({
+                          ...c,
+                          selected: false
+                        }));
+                        setCards(updatedCards);
+                        return;
+                      }
+                    }
+
+                    // Update card selection state
                     const updatedCards = cards.map(c => ({
                       ...c,
-                      selected: c.id === card.id ? !c.selected : c.selected
+                      selected: c.id === card.id ? true : (selectedCards.find(sc => sc.id === c.id) ? true : false)
                     }));
                     setCards(updatedCards);
-
-                    const newSelectedCards = [...selectedCards, card];
+                    
                     if (newSelectedCards.length === 3) {
                       // Check if all three cards match
-                      if (newSelectedCards.every(c => c.type === card.type)) {
+                      if (newSelectedCards.every(c => c.type === newSelectedCards[0].type)) {
                         // Remove matched cards and reveal next layer if needed
                         const removedIds = new Set(newSelectedCards.map(c => c.id));
                         let updatedCards = cards.map(c => ({
@@ -206,10 +222,23 @@ function App() {
                           }
                         }
 
+                        // Update game state
                         setCards(updatedCards);
                         setSelectedCards([]);
                         setPendingCard(null);
+
+                        // Check if any cards are still visible
+                        const hasVisibleCards = updatedCards.some(c => c.visible);
+                        if (!hasVisibleCards) {
+                          setGameStatus('won');
+                        }
                       } else {
+                        // Reset selection if three cards don't match
+                        const updatedCards = cards.map(c => ({
+                          ...c,
+                          selected: false
+                        }));
+                        setCards(updatedCards);
                         setSelectedCards([]);
                       }
                     } else {
@@ -218,8 +247,8 @@ function App() {
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${(card.x * 60 + (card.z * 15))}px`,
-                    top: `${(card.y * 60 + (card.z * 15))}px`,
+                    left: `${(card.x * 70 + (card.z * 35) - (10 * 70 / 2))}px`,
+                    top: `${(card.y * 70 + (card.z * 35) - (8 * 70 / 2))}px`,
                     transform: `${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? 1 : 0,
                     transition: 'all 0.3s ease',
@@ -248,7 +277,7 @@ function App() {
             })}
           
           {/* Card slots */}
-          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex gap-4 mb-8">
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex gap-4 mb-8 z-40">
             {slotCards.map((slotCard, index) => (
               <button
                 key={`slot-${index}`}
