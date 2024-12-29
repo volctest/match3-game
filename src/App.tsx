@@ -21,14 +21,14 @@ function App() {
     const types: IconType[] = ['campfire', 'lettuce', 'scissors', 'yarn', 'glove', 'stump', 'fork', 'carrot', 'hay', 'cotton', 'corn'];
     const initialCards: Card[] = [];
     
-    // Create 4 layers of cards
-    for (let z = 0; z < 4; z++) {
-      for (let y = 0; y < 4; y++) {
-        for (let x = 0; x < 4; x++) {
+    // Create a single layer of 10x8 cards
+    for (let z = 0; z < 1; z++) {
+      for (let y = 0; y < 8; y++) {
+        for (let x = 0; x < 10; x++) {
           initialCards.push({
             id: `${x}-${y}-${z}`,
             type: types[Math.floor(Math.random() * types.length)],
-            visible: z === 3, // Only top layer visible initially
+            visible: true, // All cards visible in single layer
             selected: false,
             x,
             y,
@@ -80,14 +80,14 @@ function App() {
               const types: IconType[] = ['campfire', 'lettuce', 'scissors', 'yarn', 'glove', 'stump', 'fork', 'carrot', 'hay', 'cotton', 'corn'];
               const initialCards: Card[] = [];
               
-              // Create 4 layers of cards
-              for (let z = 0; z < 4; z++) {
-                for (let y = 0; y < 4; y++) {
-                  for (let x = 0; x < 4; x++) {
+              // Create a single layer of 10x8 cards
+              for (let z = 0; z < 1; z++) {
+                for (let y = 0; y < 8; y++) {
+                  for (let x = 0; x < 10; x++) {
                     initialCards.push({
                       id: `${x}-${y}-${z}`,
                       type: types[Math.floor(Math.random() * types.length)],
-                      visible: z === 3, // Only top layer visible initially
+                      visible: true, // All cards visible in single layer
                       selected: false,
                       x,
                       y,
@@ -144,7 +144,7 @@ function App() {
           </button>
         </div>
 
-        <div className="relative w-full h-[1000px] py-8 overflow-visible">
+        <div className="relative w-full h-[1000px] py-8 overflow-visible flex justify-center items-center">
           {cards
             .filter(card => card.visible)
             .map(card => {
@@ -157,7 +157,7 @@ function App() {
                     if (pendingCard) {
                       // If we have a pending card and click another card, try to match
                       if (pendingCard.type === card.type) {
-                        const matchingCards = [...selectedCards, card, pendingCard];
+                        const matchingCards = [...selectedCards, card];
                         if (matchingCards.length === 3) {
                           // Remove matched cards
                           const removedIds = new Set(matchingCards.map(c => c.id));
@@ -170,22 +170,39 @@ function App() {
                           setSelectedCards([]);
                           setPendingCard(null);
                         } else {
+                          // Update selected cards and mark the current card as selected
+                          const updatedCards = cards.map(c => ({
+                            ...c,
+                            selected: matchingCards.some(mc => mc.id === c.id) || c.id === pendingCard.id
+                          }));
+                          setCards(updatedCards);
                           setSelectedCards(matchingCards);
                         }
                       } else {
+                        // Clear selection if types don't match
+                        const updatedCards = cards.map(c => ({
+                          ...c,
+                          selected: false
+                        }));
+                        setCards(updatedCards);
                         setPendingCard(null);
                         setSelectedCards([]);
                       }
                     } else {
-                      // Set this card as pending for slot placement or matching
+                      // Set this card as pending and mark it as selected
+                      const updatedCards = cards.map(c => ({
+                        ...c,
+                        selected: c.id === card.id
+                      }));
+                      setCards(updatedCards);
                       setPendingCard(card);
                       setSelectedCards([card]);
                     }
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${(card.x * (CARD_WIDTH + 8)) + (card.z * ((CARD_WIDTH + 8) / 2))}px`,
-                    top: `${(card.y * (CARD_HEIGHT + 8)) + (card.z * ((CARD_HEIGHT + 8) / 2))}px`,
+                    left: `${(card.x * CARD_WIDTH) + (card.z * (CARD_WIDTH / 2))}px`,
+                    top: `${(card.y * CARD_HEIGHT) + (card.z * (CARD_HEIGHT / 2))}px`,
                     transform: `${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? 1 : 0,
                     transition: 'all 0.3s ease',
