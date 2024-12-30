@@ -62,7 +62,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#D0FFB0] p-8 flex justify-center">
-      <div className="w-full max-w-[1200px]">
+      <div className="w-full max-w-[800px] mx-auto">
         <h1 className="text-4xl font-bold text-center mb-8">消消乐游戏</h1>
         
         {gameStatus !== 'playing' && (
@@ -145,7 +145,7 @@ function App() {
           </button>
         </div>
 
-        <div className="relative w-full h-[600px] flex items-center justify-center bg-[#D0FFB0]/50 rounded-lg z-10 mx-auto overflow-visible">
+        <div className="relative w-[600px] h-[600px] flex items-center justify-center bg-[#D0FFB0]/50 rounded-lg z-10 mx-auto overflow-visible" style={{ marginLeft: 'auto', marginRight: 'auto' }}>
           {cards
             .filter(card => card.visible)
             .map(card => {
@@ -154,29 +154,47 @@ function App() {
                 <button
                   key={card.id}
                   onClick={() => {
-                    // If card is already selected, ignore the click
-                    if (card.selected) {
+                    // If card is not visible or already selected, ignore the click
+                    if (!card.visible || selectedCards.some(c => c.id === card.id)) {
                       return;
                     }
 
-                    // If we're starting a new selection and this card type doesn't match previous selections, reset
+                    // If this card is already selected, ignore the click
+                    if (selectedCards.some(c => c.id === card.id)) {
+                      return;
+                    }
+
+                    // If we have previous selections and this card doesn't match, reset selection
                     if (selectedCards.length > 0 && card.type !== selectedCards[0].type) {
                       setSelectedCards([]);
-                      setCards(cards.map(c => ({
-                        ...c,
-                        selected: false
-                      })));
+                      setCards(cards.map(c => ({ ...c, selected: false })));
                       return;
                     }
 
                     // Add the new card to selection
                     const newSelectedCards = [...selectedCards, card];
                     
-                    // Update card selection state with consistent green color
-                    setCards(cards.map(c => ({
+                    // Update all cards with consistent green highlighting
+                    const updatedCards = cards.map(c => ({
                       ...c,
                       selected: newSelectedCards.some(sc => sc.id === c.id)
-                    })));
+                    }));
+
+                    // If we have three matching cards, remove them
+                    if (newSelectedCards.length === 3) {
+                      const matchingCardIds = newSelectedCards.map(c => c.id);
+                      const updatedCardsAfterMatch = cards.map(c => ({
+                        ...c,
+                        visible: c.visible && !matchingCardIds.includes(c.id),
+                        selected: false
+                      }));
+                      setCards(updatedCardsAfterMatch);
+                      setSelectedCards([]);
+                      return;
+                    }
+                    
+                    setCards(updatedCards);
+                    setSelectedCards(newSelectedCards);
                     
                     if (newSelectedCards.length === 3) {
                       // Check if all three cards match
@@ -186,7 +204,7 @@ function App() {
                         let updatedCards = cards.map(c => ({
                           ...c,
                           visible: removedIds.has(c.id) ? false : c.visible,
-                          selected: false
+                          selected: false as const
                         }));
 
                         // Check each layer from top to bottom
@@ -214,7 +232,7 @@ function App() {
                         }
                       } else {
                         // Reset selection if three cards don't match
-                        setCards(cards.map(c => ({ ...c, selected: false })));
+                        setCards(cards.map(c => ({ ...c, selected: false as const })));
                         setSelectedCards([]);
                       }
                     } else {
@@ -223,8 +241,8 @@ function App() {
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${(card.x * 40) + (card.z * 20) + ((1200 - (10 * 40)) / 2)}px`,
-                    top: `${(card.y * 40) + (card.z * 20) + ((600 - (8 * 40)) / 2)}px`,
+                    left: `${(card.x * 34) + (card.z * 17) + 275}px`,
+                    top: `${(card.y * 34) + (card.z * 17) + 100}px`,
                     transform: `${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? 1 : 0,
                     transition: 'all 0.3s ease',
@@ -235,17 +253,17 @@ function App() {
                     border-[6px]
                     shadow-[inset_0_2px_4px_rgba(0,0,0,0.1),0_4px_8px_rgba(0,0,0,0.15)]
                     transition-all duration-300
-                    w-[40px] h-[40px]
+                    w-[34px] h-[34px]
                     flex items-center justify-center
                     group
-                    ${card.selected 
+                    ${card.selected
                       ? 'bg-green-100 scale-95 border-green-500 shadow-[0_0_15px_rgba(22,163,74,0.5)]' 
-                      : 'bg-[#FFFDD0] border-green-200 hover:border-green-300'
+                      : 'bg-[#FFFDD0] border-green-300 hover:bg-green-50 hover:border-green-500'
                     }
                   `}
                   disabled={gameStatus !== 'playing'}
                 >
-                  <Icon className="w-8 h-8 transform transition-transform group-hover:scale-110 drop-shadow-lg" />
+                  <Icon className="w-6 h-6 transform transition-transform group-hover:scale-110 drop-shadow-lg" />
                 </button>
               );
             })}
@@ -265,7 +283,7 @@ function App() {
                   ${slotCard 
                     ? (selectedCards.includes(slotCard) 
                       ? 'bg-green-100 scale-95 border-green-500 shadow-[0_0_15px_rgba(22,163,74,0.5)]'
-                      : 'bg-[#FFFDD0] border-green-200 hover:border-green-300')
+                      : 'bg-[#FFFDD0] border-green-300 hover:border-green-500')
                     : 'bg-gray-200 border-green-100 hover:border-green-200'
                   }
                   transition-all duration-300
