@@ -154,23 +154,18 @@ function App() {
                 <button
                   key={card.id}
                   onClick={() => {
-                    // Check if clicking a different type after selecting cards
-                    if (selectedCards.length > 0 && !card.selected && card.type !== selectedCards[0].type) {
-                      // Reset selection if clicking different type
+                    // If card is already selected, ignore the click
+                    if (card.selected) {
+                      return;
+                    }
+
+                    // If we're starting a new selection and this card type doesn't match previous selections, reset
+                    if (selectedCards.length > 0 && card.type !== selectedCards[0].type) {
                       setSelectedCards([]);
                       setCards(cards.map(c => ({
                         ...c,
                         selected: false
                       })));
-                      return;
-                    }
-
-                    if (card.selected) {
-                      // Deselect if clicking the same card
-                      setSelectedCards(selectedCards.filter(c => c.id !== card.id));
-                      setCards(cards.map(c => 
-                        c.id === card.id ? { ...c, selected: false } : c
-                      ));
                       return;
                     }
 
@@ -228,8 +223,8 @@ function App() {
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${(card.x * 30) + (card.z * 15) + 500}px`,
-                    top: `${(card.y * 30) + (card.z * 15) + 150}px`,
+                    left: `${(card.x * 40) + (card.z * 20) + ((1200 - (10 * 40)) / 2)}px`,
+                    top: `${(card.y * 40) + (card.z * 20) + ((600 - (8 * 40)) / 2)}px`,
                     transform: `${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? 1 : 0,
                     transition: 'all 0.3s ease',
