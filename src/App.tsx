@@ -161,7 +161,7 @@ function App() {
           </button>
         </div>
 
-        <div className="relative w-full max-w-[800px] h-[450px] flex items-center justify-center bg-[#D0FFB0]/50 rounded-lg z-10 mx-auto mb-4 overflow-visible">
+        <div className="relative w-full max-w-[800px] h-[450px] flex items-center justify-center bg-[#D0FFB0]/50 rounded-lg z-10 mx-auto mb-4 overflow-visible" style={{ minHeight: '450px' }}>
           {cards
             .filter(card => card.visible)
             .map(card => {
@@ -252,7 +252,7 @@ function App() {
                   style={{
                     position: 'absolute',
                     left: `${(card.x * 34) + (card.z * 17) + ((800 - (10 * 34 + 3 * 17)) / 2)}px`,
-                    top: `${(card.y * 34) + (card.z * 17) + ((450 - (8 * 34 + 3 * 17)) / 2)}px`,
+                    top: `${(card.y * 34) + (card.z * 17) + ((450 - (8 * 34 + 3 * 17)) / 2) - 20}px`,
                     transform: `${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? 1 : 0,
                     transition: 'all 0.3s ease',
@@ -261,7 +261,10 @@ function App() {
                   className={`
                     p-0 rounded-xl
                     border-[6px]
-                    ${card.z === 3 ? 'shadow-xl' : card.z === 2 ? 'shadow-lg' : card.z === 1 ? 'shadow-md' : 'shadow-sm'}
+                    ${card.z === 3 ? 'shadow-[0_8px_16px_rgba(0,0,0,0.3)]' : 
+                      card.z === 2 ? 'shadow-[0_6px_12px_rgba(0,0,0,0.25)]' : 
+                      card.z === 1 ? 'shadow-[0_4px_8px_rgba(0,0,0,0.2)]' : 
+                      'shadow-[0_2px_4px_rgba(0,0,0,0.15)]'}
                     transition-all duration-300
                     w-[34px] h-[34px]
                     flex items-center justify-center
@@ -279,15 +282,15 @@ function App() {
             })}
           
           {/* Card slots */}
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-40" style={{ width: `${10 * 34}px` }}>
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2 z-40" style={{ width: `${10 * 34}px` }}>
             {slotCards.map((slotCard, index) => (
               <button
                 key={`slot-${index}`}
                 className={`
                   w-[34px] h-[34px]
                   p-0 rounded-xl
-                  border-[3px]
-                  shadow-[inset_0_2px_4px_rgba(0,0,0,0.1),0_4px_8px_rgba(0,0,0,0.15)]
+                  border-[6px]
+                  shadow-[inset_0_2px_4px_rgba(0,0,0,0.1),0_4px_8px_rgba(0,0,0,0.2)]
                   flex items-center justify-center
                   group
                   ${slotCard 
