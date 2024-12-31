@@ -61,8 +61,8 @@ function App() {
   }, [cards, slotCards]);
 
   return (
-    <div className="min-h-screen bg-[#D0FFB0] p-8 flex justify-center">
-      <div className="w-full max-w-[800px] mx-auto">
+    <div className="min-h-screen bg-[#D0FFB0] p-8 flex flex-col items-center">
+      <div className="w-full max-w-[800px] flex flex-col items-center">
         <h1 className="text-4xl font-bold text-center mb-8">消消乐游戏</h1>
         
         {gameStatus !== 'playing' && (
@@ -145,7 +145,7 @@ function App() {
           </button>
         </div>
 
-        <div className="relative w-[600px] h-[600px] flex items-center justify-center bg-[#D0FFB0]/50 rounded-lg z-10 mx-auto overflow-visible" style={{ marginLeft: 'auto', marginRight: 'auto' }}>
+        <div className="relative w-[600px] h-[450px] flex items-center justify-center bg-[#D0FFB0]/50 rounded-lg z-10 mx-auto mb-4 overflow-visible">
           {cards
             .filter(card => card.visible)
             .map(card => {
@@ -241,8 +241,8 @@ function App() {
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${(card.x * 34) + (card.z * 17) + 275}px`,
-                    top: `${(card.y * 34) + (card.z * 17) + 100}px`,
+                    left: `${(card.x * 34) + (card.z * 17) + 240}px`,
+                    top: `${(card.y * 34) + (card.z * 17) + 120}px`,
                     transform: `${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? 1 : 0,
                     transition: 'all 0.3s ease',
@@ -251,7 +251,7 @@ function App() {
                   className={`
                     p-0 rounded-xl
                     border-[6px]
-                    shadow-[inset_0_2px_4px_rgba(0,0,0,0.1),0_4px_8px_rgba(0,0,0,0.15)]
+                    ${card.z === 3 ? 'shadow-xl' : card.z === 2 ? 'shadow-lg' : card.z === 1 ? 'shadow-md' : 'shadow-sm'}
                     transition-all duration-300
                     w-[34px] h-[34px]
                     flex items-center justify-center
@@ -269,14 +269,14 @@ function App() {
             })}
           
           {/* Card slots */}
-          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex gap-4 mb-8 z-40">
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex gap-2 mb-4 z-40">
             {slotCards.map((slotCard, index) => (
               <button
                 key={`slot-${index}`}
                 className={`
-                  w-[80px] h-[80px]
+                  w-[34px] h-[34px]
                   p-0 rounded-xl
-                  border-[6px]
+                  border-[3px]
                   shadow-[inset_0_2px_4px_rgba(0,0,0,0.1),0_4px_8px_rgba(0,0,0,0.15)]
                   flex items-center justify-center
                   group
@@ -313,7 +313,7 @@ function App() {
                 disabled={gameStatus !== 'playing'}
               >
                 {slotCard && React.createElement(ICONS[slotCard.type], {
-                  className: 'w-16 h-16'
+                  className: 'w-6 h-6 transform transition-transform group-hover:scale-110 drop-shadow-lg'
                 })}
               </button>
             ))}
