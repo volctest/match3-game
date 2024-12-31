@@ -18,6 +18,7 @@ function App() {
     
     // Create layers of cards (10x8 grid)
     for (let z = 0; z < 4; z++) {
+      console.log(`Generating layer ${z}`);
       for (let y = 0; y < 8; y++) {
         for (let x = 0; x < 10; x++) {
           initialCards.push({
@@ -33,6 +34,13 @@ function App() {
       }
     }
     
+    console.log('Initial card count per layer:', 
+      initialCards.reduce((acc, card) => {
+        acc[card.z] = (acc[card.z] || 0) + 1;
+        return acc;
+      }, {} as Record<number, number>)
+    );
+    
     setCards(initialCards);
   }, []);
 
@@ -40,9 +48,17 @@ function App() {
   useEffect(() => {
     if (cards.length === 0) return; // Don't check until game is initialized
     
+    
     const visibleCards = cards.filter(c => c.visible);
     const slotCardsArray = slotCards.filter((c): c is Card => c !== null);
     const allPlayableCards = [...visibleCards, ...slotCardsArray];
+    
+    // Log visible cards per layer
+    const visiblePerLayer = visibleCards.reduce((acc, card) => {
+      acc[card.z] = (acc[card.z] || 0) + 1;
+      return acc;
+    }, {} as Record<number, number>);
+    console.log('Visible cards per layer:', visiblePerLayer);
     
     // Only check win/lose if we have cards in play
     if (allPlayableCards.length > 0) {
@@ -145,7 +161,7 @@ function App() {
           </button>
         </div>
 
-        <div className="relative w-[600px] h-[450px] flex items-center justify-center bg-[#D0FFB0]/50 rounded-lg z-10 mx-auto mb-4 overflow-visible">
+        <div className="relative w-full max-w-[800px] h-[450px] flex items-center justify-center bg-[#D0FFB0]/50 rounded-lg z-10 mx-auto mb-4 overflow-visible">
           {cards
             .filter(card => card.visible)
             .map(card => {
@@ -154,8 +170,8 @@ function App() {
                 <button
                   key={card.id}
                   onClick={() => {
-                    // If card is not visible or already selected, ignore the click
-                    if (!card.visible || selectedCards.some(c => c.id === card.id)) {
+                    // If card is not visible, ignore the click
+                    if (!card.visible) {
                       return;
                     }
 
@@ -180,19 +196,6 @@ function App() {
                       selected: newSelectedCards.some(sc => sc.id === c.id)
                     }));
 
-                    // If we have three matching cards, remove them
-                    if (newSelectedCards.length === 3) {
-                      const matchingCardIds = newSelectedCards.map(c => c.id);
-                      const updatedCardsAfterMatch = cards.map(c => ({
-                        ...c,
-                        visible: c.visible && !matchingCardIds.includes(c.id),
-                        selected: false
-                      }));
-                      setCards(updatedCardsAfterMatch);
-                      setSelectedCards([]);
-                      return;
-                    }
-                    
                     setCards(updatedCards);
                     setSelectedCards(newSelectedCards);
                     
@@ -210,7 +213,10 @@ function App() {
                         // Check each layer from top to bottom
                         for (let layer = 3; layer >= 0; layer--) {
                           const layerStillHasVisible = updatedCards.some(c => c.z === layer && c.visible);
+                          console.log(`Layer ${layer} still has visible cards:`, layerStillHasVisible);
+                          
                           if (!layerStillHasVisible && layer > 0) {
+                            console.log(`Revealing layer ${layer - 1}`);
                             // Reveal the next layer down
                             updatedCards = updatedCards.map(c => {
                               if (c.z === layer - 1) {
@@ -218,6 +224,10 @@ function App() {
                               }
                               return c;
                             });
+                            
+                            // Log the number of newly visible cards
+                            const newlyVisibleCount = updatedCards.filter(c => c.z === layer - 1 && c.visible).length;
+                            console.log(`Made ${newlyVisibleCount} cards visible in layer ${layer - 1}`);
                           }
                         }
 
@@ -241,8 +251,8 @@ function App() {
                   }}
                   style={{
                     position: 'absolute',
-                    left: `${(card.x * 34) + (card.z * 17) + 240}px`,
-                    top: `${(card.y * 34) + (card.z * 17) + 120}px`,
+                    left: `${(card.x * 34) + (card.z * 17) + ((800 - (10 * 34 + 3 * 17)) / 2)}px`,
+                    top: `${(card.y * 34) + (card.z * 17) + ((450 - (8 * 34 + 3 * 17)) / 2)}px`,
                     transform: `${card.visible ? 'scale(1)' : 'scale(0)'}`,
                     opacity: card.visible ? 1 : 0,
                     transition: 'all 0.3s ease',
@@ -256,7 +266,7 @@ function App() {
                     w-[34px] h-[34px]
                     flex items-center justify-center
                     group
-                    ${card.selected
+                    ${card.selected || (selectedCards.length > 0 && card.type === selectedCards[0].type)
                       ? 'bg-green-100 scale-95 border-green-500 shadow-[0_0_15px_rgba(22,163,74,0.5)]' 
                       : 'bg-[#FFFDD0] border-green-300 hover:bg-green-50 hover:border-green-500'
                     }
@@ -269,7 +279,7 @@ function App() {
             })}
           
           {/* Card slots */}
-          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex gap-2 mb-4 z-40">
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-40" style={{ width: `${10 * 34}px` }}>
             {slotCards.map((slotCard, index) => (
               <button
                 key={`slot-${index}`}
@@ -281,7 +291,7 @@ function App() {
                   flex items-center justify-center
                   group
                   ${slotCard 
-                    ? (selectedCards.includes(slotCard) 
+                    ? (selectedCards.includes(slotCard) || (selectedCards.length > 0 && slotCard.type === selectedCards[0].type) 
                       ? 'bg-green-100 scale-95 border-green-500 shadow-[0_0_15px_rgba(22,163,74,0.5)]'
                       : 'bg-[#FFFDD0] border-green-300 hover:border-green-500')
                     : 'bg-gray-200 border-green-100 hover:border-green-200'
@@ -301,12 +311,35 @@ function App() {
                     ));
                     setSelectedCards([]);
                   } else if (slotCard) {
-                    // Select card from slot
-                    setSelectedCards([...selectedCards, slotCard]);
-                    // Remove card from slot
-                    const newSlots = [...slotCards];
-                    newSlots[index] = null;
-                    setSlotCards(newSlots);
+                    // If this card is already selected, ignore the click
+                    if (selectedCards.some(c => c.id === slotCard.id)) {
+                      return;
+                    }
+
+                    // If we have previous selections and this card doesn't match, reset selection
+                    if (selectedCards.length > 0 && slotCard.type !== selectedCards[0].type) {
+                      setSelectedCards([]);
+                      return;
+                    }
+
+                    // Add the new card to selection
+                    const newSelectedCards = [...selectedCards, slotCard];
+                    setSelectedCards(newSelectedCards);
+
+                    if (newSelectedCards.length === 3) {
+                      // Check if all three cards match
+                      if (newSelectedCards.every(c => c.type === newSelectedCards[0].type)) {
+                        // Remove matched cards from slots
+                        const newSlots = slotCards.map(sc => 
+                          sc && newSelectedCards.some(selected => selected.id === sc.id) ? null : sc
+                        );
+                        setSlotCards(newSlots);
+                        setSelectedCards([]);
+                      } else {
+                        // Reset selection if three cards don't match
+                        setSelectedCards([]);
+                      }
+                    }
                   }
                 }}
 
